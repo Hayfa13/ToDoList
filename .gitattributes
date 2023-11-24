@@ -1,1 +1,5 @@
+<<<<<<< HEAD
 *.png filter=lfs diff=lfs merge=lfs -text
+=======
+*.png filter=lfs diff=lfs merge=lfs -text
+>>>>>>> d90230ba441fce41f7593966f415e0460968b8b3
