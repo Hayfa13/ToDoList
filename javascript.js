@@ -16,18 +16,20 @@ todoValue.addEventListener("keypress", function (e) {
     }
 });
 
-ReadToDoItems();
+document.addEventListener("DOMContentLoaded", function() {
+    ReadToDoItems();
+    listItems.addEventListener("change", handleCheckboxChange);
+});
 
 function ReadToDoItems() {
-    console.log(todoData);
     todoData.forEach((element) => {
         let li = document.createElement("li");
-        let style = element.status ? 'style="text-decoration: line-through"' : '';
+
         const todoItems = `<label class="checkbox-label">
-                              <input type="checkbox" onchange="CompleteToDoItem(this)" ${element.status ? 'checked' : ''}>
+                              <input type="checkbox" ${element.status ? 'checked' : ''}>
                               <span class="checkbox-custom"></span>
                             </label>
-                            <div ${style} onclick="ToggleComplete(this)">${element.item}</div>
+                            <div>${element.item}</div>
                             <div>
                                 <img class="edit todo-controls" onclick="UpdateToDoItems(this)" src="/pencil.png"/>
                                 <img class="delete todo-controls" onclick="DeleteToDoItems(this)" src="/bin.png"/>
@@ -36,6 +38,26 @@ function ReadToDoItems() {
         listItems.appendChild(li);
     });
 }
+
+function handleCheckboxChange(event) {
+    const checkbox = event.target;
+    const todoItem = checkbox.parentElement.parentElement.querySelector("div");
+    updateText = todoItem.innerText.trim();
+
+
+    todoData.forEach((element) => {
+        if (updateText === element.item) {
+            element.status = checkbox.checked;
+        }
+    });
+
+    setLocalStorage();
+    
+    if (event.detail === 0) {
+        event.preventDefault();
+    }
+}
+
 
 function CreateToDoData() {
     if (todoValue.value === "") {
@@ -47,13 +69,17 @@ function CreateToDoData() {
         } else {
             let li = document.createElement("li");
 
-            li.id = "someUniqueID"; 
+            li.id = "someUniqueID";
 
-            const todoItems = `<div ondblclick="CompleteToDoItem(this)">${todoValue.value}</div>
-                               <div>
-                                   <img class="edit todo-controls" onclick ="UpdateToDoItems(this)" src="/pencil.png"/>
-                                   <img class="delete todo-controls" onclick= "DeleteToDoItems(this)" src="/bin.png"/>
-                               </div>`;
+            const todoItems = `<label class="checkbox-label">
+                                  <input type="checkbox" onchange="CompleteToDoItem(this)">
+                                  <span class="checkbox-custom"></span>
+                                </label>
+                                <div>${todoValue.value}</div>
+                                <div>
+                                    <img class="edit todo-controls" onclick="UpdateToDoItems(this)" src="/pencil.png"/>
+                                    <img class="delete todo-controls" onclick="DeleteToDoItems(this)" src="/bin.png"/>
+                                </div>`;
 
             li.innerHTML = todoItems;
             listItems.appendChild(li);
@@ -68,28 +94,21 @@ function CreateToDoData() {
     }
 }
 
-function CompleteToDoItem(e) {
-    console.log(e.parentElement);
-    const todoItem = e.parentElement.querySelector("div");
+function CompleteToDoItem(checkbox) {
+    const todoItem = checkbox.parentElement.parentElement.querySelector("div");
+    todoItem.style.textDecoration = checkbox.checked ? "line-through" : "";
 
-    if (todoItem.style.textDecoration === "") {
-        todoItem.style.textDecoration = "line-through";
-        const editButton = e.parentElement.querySelector("img.edit");
-        if (editButton) {
-            editButton.remove();
+    updateText = todoItem.innerText.trim();
+
+    todoData.forEach((element) => {
+        if (updateText === element.item) {
+            element.status = checkbox.checked;
         }
+    });
 
-        updateText = todoItem.innerText.trim(); 
-
-        todoData.forEach((element) => {
-            if (updateText === element.item) {
-                element.status = true;
-            }
-        });
-
-        setLocalStorage();
-    }
+    setLocalStorage();
 }
+
 
 function UpdateOnSelectedItems() {
     for (let i = 0; i < todoData.length; i++) {
@@ -160,7 +179,9 @@ function DeleteToDoItems(e) {
 
 function setLocalStorage() {
     localStorage.setItem("todoData", JSON.stringify(todoData));
+    console.log("Updated todoData in local storage:", todoData);
 }
+
 
 function SetAlertMessage(message) {
     AlertMessage.removeAttribute("class");
